@@ -3,10 +3,7 @@
 //requires to calculate date and time
 #include <time.h>
 
-#define HOME_PAGE "<html><head><title>Home</title></head></html>"
-
-#define ERROR_PAGE "<html><head><title>404: Not Found</title></head></html>"
-
+#define HOME_PAGE ""
 int main(int argc, char **argv)
 {
 	/*socket IDs; one for the listening socket and one for the 
@@ -17,12 +14,10 @@ int main(int argc, char **argv)
 	struct sockaddr_in servaddr;
 
 	//verifies number of command-line args; two in this instance
-	char readbuff[MAXLINE];
-	char writebuff[MAXLINE];
+	char buff[MAXLINE];
 
-	//LAB4
-	char cmd[16], path[64], vers[16];
-
+	//required to calculate dat and time
+	time_t ticks;
 
 	if (argc != 2)
 	{
@@ -40,38 +35,16 @@ int main(int argc, char **argv)
 
 	Listen(listenfd, LISTENQ);
 
-	int n;
-
 	for ( ; ; )
 	{
 		connfd = Accept(listenfd, (SA *) NULL, NULL);
 
-		while ( (n = read(connfd, readbuff, MAXLINE)) > 0 )
-		{
-			if (strstr(readbuff, "\r\n\r\n"))
-			{
-				break;
-			}
-		}
-		//WHAT IS n?
-		readbuff[n] = 0;
-                sscanf(readbuff, "%s %s %s", cmd, path, vers);
+		ticks = time(NULL);
+		snprintf(buff, sizeof(buff), "%.24s\r\n", ctime(&ticks));
+		Write(connfd, buff, strlen(buff));
 
-		if ( strcmp(path,"/index.html") == 0 )
-		{
-			snprintf(writebuff, sizeof(writebuff), HOME_PAGE);
-			writebuff[n] = 0;
-			Write(connfd, writebuff, strlen(writebuff));
-		}
-		else
-		{
-			snprintf(writebuff, sizeof(writebuff), ERROR_PAGE);
-			writebuff[n] = 0;
-			Write(connfd, writebuff, strlen(writebuff));
-		}
 		Close(connfd);
 	}
-
 }
 /*
 Note the use of upper-case letters at the start of the socket primities names.

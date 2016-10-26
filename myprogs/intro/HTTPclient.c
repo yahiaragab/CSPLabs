@@ -52,7 +52,7 @@ main(int argc, char **argv)
 		err_sys("read error");
 	}
 
-	printf("counter = %d\n", counter);
+	printf("\ncounter = %d\n", counter);
 
 	exit(0);
 }
