@@ -6,11 +6,24 @@ main(int argc, char **argv)
 	int sockfd, n, counter = 0;
 	char recvline[MAXLINE + 1], buff[MAXLINE];
 	struct sockaddr_in servaddr;
+	char *ptr, **pptr;
+	struct hostent *hptr;
 
-	if (argc != 3)
+	ptr = argv[1];
+
+	if (argc != 4)
 	{
 		err_quit("usage: a.out <IPaddress>");
 	}
+
+	if ( (hptr = gethostbyname(ptr)) == NULL)
+	{
+		err_msg("gethostbyname error for host: %s: %s",
+			ptr, hstrerror(h_errno));
+
+	}
+
+	pptr = hptr->h_addr_list;
 
 	if ( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0 )
 	{
@@ -22,20 +35,24 @@ main(int argc, char **argv)
 	servaddr.sin_port = htons(atoi(argv[2])); /*daytime server port 
 					taken from the command line */
 
-	if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <=0) /*convert dotted decimal 
-							IP address to network byte ord*/
-	{
-		err_quit("inet_pton error for %s", argv[1]);
-	}
+	//memcpy(&servaddr.sin_addr, *pptr, sizeof(*pptr));
+
+	//if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <=0) /*convert dotted decimal 
+//							IP address to network byte ord*/
+	//{
+	//	err_quit("inet_pton error for %s", argv[1]);
+	//}
 
 	if (connect(sockfd, (SA *) &servaddr, sizeof(servaddr)) < 0)
 	{
 		err_sys("connect error");
 	}
 
-	snprintf(buff, sizeof(buff), "GET /index.html HTTP/1.1\r\nHost: www.dit.ie\r\nConnection: Close\r\n\r\n");
+	snprintf(buff, sizeof(buff), "GET /%s.html HTTP/1.1\r\n"
+				"Host: www.dit.ie\r\n"
+				"Connection: Close\r\n\r\n", argv[3]);
 	Write(sockfd, buff, strlen(buff));
-
+	memcpy(&servaddr.sin_addr, *pptr, sizeof(*pptr));
 	while ( (n = read(sockfd, recvline, MAXLINE)) > 0)
 	{
 		counter++; /*count the number of loops completed*/
