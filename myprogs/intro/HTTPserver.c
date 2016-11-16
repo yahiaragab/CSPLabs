@@ -1,8 +1,10 @@
+
 //include appropriate header file(s) for in-built socker functions etc.
 #include "unp.h"
 //requires to calculate date and time
 #include <time.h>
 //#include <ncurses.h>
+#include <stdio.h>
 
 #define HOME_PAGE "<html><head><title>Home</title></head></html>"
 
@@ -12,7 +14,7 @@ int main(int argc, char **argv)
 {
 	/*socket IDs; one for the listening socket and one for the
 	connected socket */
-	int listenfd, connfd;
+	int listenfd, connfd, char_in, count = 0;
 
 	/*address structure to hold this server's address*/
 	struct sockaddr_in servaddr, cliaddr;
@@ -28,6 +30,8 @@ int main(int argc, char **argv)
 
 	//LAB4
 	char cmd[16], path[64], vers[16], path1[64] = {'.'};
+
+	FILE * fp;
 
 	if (argc != 2)
 	{
@@ -46,8 +50,7 @@ int main(int argc, char **argv)
 	Listen(listenfd, LISTENQ);
 
 	int n;
-	FILE *fp;
-//CANT GET FILES WOKING	
+
 	for ( ; ; )
 	{
 		len = sizeof(cliaddr);
@@ -60,59 +63,57 @@ int main(int argc, char **argv)
 
 		while ( (n = read(connfd, readbuff, MAXLINE)) > 0 )
 		{
+			//readbuff[n] = 0;
+
+			if (fputs(readbuff, stdout) == EOF)
+			{
+				err_sys("fputs error");
+			}
+
 			if (strstr(readbuff, "\r\n\r\n"))
 			{
 				break;
 			}
 		}
+
+		if (n < 0)
+		{
+			err_sys("read error");
+		}
+
 		//WHAT IS n?
 		readbuff[n] = 0;
                 sscanf(readbuff, "%s %s %s", cmd, path, vers);
 
 		strcat(path1, path);
 
-		if ( (fp = fopen(path1, "r")) )
+		if  (strcmp(path1, "./") == 0)
 		{
-			printf("OOOPPEEENN!!!\n\n");
-/*		//putc(
-	}
-
-        if ( fopen(path1, "rb") )
-        {
-*/
-			char file[MAXLINE];
-			int g = 0;
-			while(!feof(fp))
-			{
-				fscanf(fp, "%s", file[g]);
-				g++;
-			}
-			file[g] = 0;
-
-			if ( strcmp(path,"/index.html") == 0 )
-			{
-				snprintf(writebuff, sizeof(writebuff), file);
-				//snprintf(writebuff, sizeof(writebuff), fp);
-				writebuff[n] = 0;
-				Write(connfd, writebuff, strlen(writebuff));
-			}
-			else
-			{
-				snprintf(writebuff, sizeof(writebuff), file);
-				writebuff[n] = 0;
-				Write(connfd, writebuff, strlen(writebuff));
-			}
-
-
+			strcpy(path1, "./index.html");
 		}
-		else
+
+		fp = fopen(path1, "r");
+
+		if (fp == NULL)
 		{
-			snprintf(writebuff, sizeof(writebuff),
-				"FILE NOT FOUND");
-                        writebuff[n] = 0;
-                 	Write(connfd, writebuff, strlen(writebuff));
+			fp = fopen("error.html", "r");
 		}
+
+		strcpy(writebuff, "");
+
+		while ((char_in = fgetc(fp)) != EOF)
+		{
+			writebuff[count] = char_in;
+			count++;
+		}
+
+		writebuff[count] = 0;
+
+		Write(connfd, writebuff, strlen(writebuff));
+		count = 0;
 		fclose(fp);
+		strcpy(path1, ".");
+
 		Close(connfd);
 	}
 
