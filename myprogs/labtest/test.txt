@@ -1,0 +1,18 @@
+Name: Yahia Ragab
+Student Number: D14122773
+
+Reading: 1234
+Written: Reading: 1234 Cost: 1604.20
+
+Reading: 100
+Written: Reading: 100 Cost: 130.00
+
+Reading: 781
+Written: Reading: 781 Cost: 1015.30
+
+Reading: 555
+Written: Reading: 555 Cost: 721.50
+
+Reading: 141
+Written: Reading: 141 Cost: 183.30
+
