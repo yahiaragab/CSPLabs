@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 
 		while ( (n = read(connfd, readbuff, MAXLINE)) > 0 )
 		{
-			//readbuff[n] = 0;
+			readbuff[n] = 0;
 
 			if (fputs(readbuff, stdout) == EOF)
 			{
@@ -82,7 +82,7 @@ int main(int argc, char **argv)
 		}
 
 		//WHAT IS n?
-		readbuff[n] = 0;
+		//readbuff[n] = 0;
                 sscanf(readbuff, "%s %s %s", cmd, path, vers);
 
 		strcat(path1, path);

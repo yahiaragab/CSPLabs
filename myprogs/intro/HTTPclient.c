@@ -48,12 +48,12 @@ main(int argc, char **argv)
 		err_sys("connect error");
 	}
 
-	snprintf(buff, sizeof(buff), "GET /%s.html HTTP/1.1\r\n"
+	snprintf(buff, sizeof(buff), "GET %s HTTP/1.1\r\n"
 				"Host: www.dit.ie\r\n"
 				"Connection: Close\r\n\r\n", argv[3]);
 	Write(sockfd, buff, strlen(buff));
 	memcpy(&servaddr.sin_addr, *pptr, sizeof(*pptr));
-	while ( (n = read(sockfd, recvline, MAXLINE)) > 0)
+	while ( (n = read(sockfd, recvline, 10)) > 0)
 	{
 		counter++; /*count the number of loops completed*/
 		recvline[n] = 0; //null terminate
